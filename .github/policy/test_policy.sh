@@ -30,14 +30,14 @@ for b in feature/resumable-onboarding bugfix/prevent-overlapping-bookings hotfix
          release/2.4.0 release/3.0.0-rc.1 support/1.x support/2.3 feature/rea-92-remove-dead-structure \
          bugfix/rea-44-withdrawal-holds-under-failure hotfix/pay-91-payment-webhook-idempotency refactor/centralize-authorization-policy \
          perf/cache-embedding-lookups ci/validate-migrations-before-release main develop \
-         bugfix/prevent-cross-tenant-memory-access feature/ipv-6-support feature/abc-12-is-just-a-name; do expect 0 "branch ok" $B "$b"; done
+         bugfix/prevent-cross-tenant-memory-access feature/ipv-6-support feature/abc-12-is-just-a-name feature/onboarding chore/deps feature/rea-92-onboarding; do expect 0 "branch ok" $B "$b"; done
 for b in "feature/resumable_onboarding" "feature/ResumableOnboarding" "feature/resumable onboarding" \
          "fix/preserve-oauth-redirect" "feature/new-auth-hook-v2" "feature/resumable-onboarding-final" \
          "feature/changes" "bugfix/fixes" "chore/cleanup" "feature/wip" "feature/recurring-bookings-and-auth-fixes" \
          "release/september-updates" "support/customer-tickets" "feature/vin-auth-fix-v2" \
-         "bugfix/prevent-users-from-being-able-to-access-memory-from-other-tenants" "feature/onboarding" \
+         "bugfix/prevent-users-from-being-able-to-access-memory-from-other-tenants" \
          "feature/change-login.ts" "wip/anything-here" "feature/REA-92/remove-dead-structure" "feature/rea-92/remove-dead-structure" \
-         "feature/REA-92-remove-dead-structure" "feature/rea-92" "feature/REA-92" "feature/rea-92-remove-dead-structure-v2" "feature/rea-92-onboarding"; do expect 1 "branch bad" $B "$b"; done
+         "feature/REA-92-remove-dead-structure" "feature/rea-92" "feature/REA-92" "feature/rea-92-remove-dead-structure-v2"; do expect 1 "branch bad" $B "$b"; done
 # --- attribution, on a throwaway repo
 tmp=$(mktemp -d); ( cd "$tmp" && git init -q -b main && git config user.email t@t && git config user.name t \
   && echo a > a && git add a && git commit -qm "feat(core): seed" \

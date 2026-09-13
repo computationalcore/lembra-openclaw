@@ -2,8 +2,8 @@
 # Enforces the gitflow-branches skill.
 # usage: check_branch_name.sh "<branch>"   exit 0 = ok, 1 = reject (reason on stderr)
 set -u
-# Length target from the gitflow-branches skill ("roughly 2-5 semantic words"); one word of slack.
-MIN_WORDS=${MIN_WORDS:-2}
+# Length cap from the gitflow-branches skill ("roughly 2-5 semantic words") with one word of slack.
+# No minimum: chore/deps is a legitimate branch; vagueness is the generic-name list's job, not a counter's.
 MAX_WORDS=${MAX_WORDS:-6}
 b="${1-}"
 fail() { echo "branch-name: $1" >&2; echo "  branch: $b" >&2; exit 1; }
@@ -32,7 +32,6 @@ printf '%s' "$rest" | grep -Eq '^[a-z0-9]+(-[a-z0-9]+)*$' || fail "name must be 
 printf '%s' "$rest" | grep -Eq "^($keyalt)-[0-9]+$" && fail "a ticket id alone is not a name; add the description: '${rest}-<description>'"
 slug=$(printf '%s' "$rest" | sed -E "s/^($keyalt)-[0-9]+-//")
 words=$(printf '%s' "$slug" | awk -F- '{print NF}')
-[ "$words" -ge "$MIN_WORDS" ] || fail "description needs at least $MIN_WORDS words that state the objective"
 [ "$words" -le "$MAX_WORDS" ] || fail "description has $words words; compress to at most $MAX_WORDS without losing the distinction"
 printf '%s' "$slug" | grep -Eq -- '(^|-)(v[0-9]+|final|new|old|working|ready|wip|tmp|temp|test|draft)$' && fail "must not encode workflow state ('$rest')"
 printf '%s' "$rest" | grep -Eq -- '(^|-)(changes|update|updates|fixes|misc|cleanup|stuff|new-version)$' && fail "generic name says nothing ('$rest')"

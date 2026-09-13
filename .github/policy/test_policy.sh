@@ -26,8 +26,8 @@ for t in "update use-checkout.ts per review" "fix: update use-checkout.ts per re
          "feat(booking): support recurring appointments and also fix the timezone bug and update the docs and more"; do expect 1 "title bad" $T "$t"; done
 # --- branches
 for b in feature/resumable-onboarding bugfix/prevent-overlapping-bookings hotfix/payment-webhook-idempotency \
-         release/2.4.0 release/3.0.0-rc.1 support/1.x support/2.3 feature/VIN-142/resumable-onboarding \
-         bugfix/BOOK-314/prevent-overlapping-bookings refactor/centralize-authorization-policy \
+         release/2.4.0 release/3.0.0-rc.1 support/1.x support/2.3 feature/rea-92-remove-dead-structure \
+         bugfix/rea-44-withdrawal-holds-under-failure hotfix/pay-91-payment-webhook-idempotency refactor/centralize-authorization-policy \
          perf/cache-embedding-lookups ci/validate-migrations-before-release main develop \
          bugfix/prevent-cross-tenant-memory-access; do expect 0 "branch ok" $B "$b"; done
 for b in "feature/resumable_onboarding" "feature/ResumableOnboarding" "feature/resumable onboarding" \
@@ -35,7 +35,8 @@ for b in "feature/resumable_onboarding" "feature/ResumableOnboarding" "feature/r
          "feature/changes" "bugfix/fixes" "chore/cleanup" "feature/wip" "feature/recurring-bookings-and-auth-fixes" \
          "release/september-updates" "support/customer-tickets" "feature/vin-auth-fix-v2" \
          "bugfix/prevent-users-from-being-able-to-access-memory-from-other-tenants" "feature/onboarding" \
-         "feature/change-login.ts" "wip/anything-here" "feature/vin-142/lowercase-ticket-is-name-ok-but-too-long-x"; do expect 1 "branch bad" $B "$b"; done
+         "feature/change-login.ts" "wip/anything-here" "feature/REA-92/remove-dead-structure" "feature/rea-92/remove-dead-structure" \
+         "feature/REA-92-remove-dead-structure" "feature/rea-92" "feature/rea-92-remove-dead-structure-v2"; do expect 1 "branch bad" $B "$b"; done
 # --- attribution, on a throwaway repo
 tmp=$(mktemp -d); ( cd "$tmp" && git init -q -b main && git config user.email t@t && git config user.name t \
   && echo a > a && git add a && git commit -qm "feat(core): seed" \

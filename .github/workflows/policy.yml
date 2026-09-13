@@ -1,0 +1,42 @@
+# Branch, commit, pull-request and attribution rules. The scripts under .github/policy/ are the
+# same ones the maintainer's other projects use; run .github/policy/test_policy.sh before editing.
+name: policy
+on:
+  pull_request:
+  merge_group:
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # PR-derived strings travel through env, never interpolated into run: (script injection).
+      - name: branch name
+        if: github.event_name == 'pull_request'
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: .github/policy/check_branch_name.sh "$BRANCH"
+      - name: pull request title
+        if: github.event_name == 'pull_request'
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: .github/policy/check_pr_title.sh "$TITLE"
+      - name: pull request body
+        if: github.event_name == 'pull_request'
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s' "$BODY" > "$RUNNER_TEMP/pr_body.md"
+          .github/policy/check_pr_body.sh "$RUNNER_TEMP/pr_body.md"
+      - name: no attribution trailers
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.base_ref }}
+        run: .github/policy/check_no_attribution.sh --range "origin/$BASE..HEAD" --body "$RUNNER_TEMP/pr_body.md"
+      - name: no secrets
+        env:
+          BASE: ${{ github.base_ref || github.event.merge_group.base_ref }}
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.21.2 \
+            detect --source /repo --no-banner --redact --log-opts="origin/${BASE#refs/heads/}..HEAD"

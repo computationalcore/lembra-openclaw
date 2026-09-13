@@ -1,0 +1,14 @@
+{
+  "id": "lembra-memory",
+  "name": "Lembra Memory",
+  "description": "Advisory memory checks before an agent speaks. Spike: novelty only.",
+  "version": "0.0.1",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "dbPath":       { "type": "string" },
+      "blockRepeats": { "type": "boolean", "default": false }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "lembra-memory",
+  "version": "0.0.1",
+  "description": "Advisory memory checks before an agent speaks",
+  "type": "module",
+  "main": "index.mjs",
+  "license": "Apache-2.0",
+  "engines": { "node": ">=24.16.0 <25 || >=26.1.0" },
+  "openclaw": { "extensions": ["./index.mjs"] }
+}

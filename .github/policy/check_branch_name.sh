@@ -2,6 +2,9 @@
 # Enforces the gitflow-branches skill.
 # usage: check_branch_name.sh "<branch>"   exit 0 = ok, 1 = reject (reason on stderr)
 set -u
+# Length target from the gitflow-branches skill ("roughly 2-5 semantic words"); one word of slack.
+MIN_WORDS=${MIN_WORDS:-2}
+MAX_WORDS=${MAX_WORDS:-6}
 b="${1-}"
 fail() { echo "branch-name: $1" >&2; echo "  branch: $b" >&2; exit 1; }
 [ -n "$b" ] || fail "empty"
@@ -15,18 +18,22 @@ case "$type" in
   fix) fail "use 'bugfix/' (or 'hotfix/' for emergency production remediation), not 'fix/'" ;;
   *) fail "unknown type '$type'" ;;
 esac
-# Optional ticket id: lower case, joined with a hyphen (feature/rea-92-remove-dead-structure).
-# The old shapes are rejected with the reason, so three agents do not produce three forms.
-printf '%s' "$rest" | grep -Eq '^[A-Za-z][A-Za-z0-9]*-[0-9]+/' \
-  && fail "the ticket id is not its own segment: a slash is a directory in the ref namespace; write 'feature/rea-92-<name>'"
-printf '%s' "$rest" | grep -Eq '^[A-Z][A-Z0-9]*-[0-9]+-' \
-  && fail "the ticket id must be lower case ('rea-92'): a case-insensitive filesystem cannot hold both cases of a ref"
+# Shape: GITFLOW_CLASS/ID-DESCRIPTION. The ticket id, when present, is always first and is
+# recognised ONLY by the tracker's team keys (TICKET_KEYS, lower case, space-separated). Anything
+# else after the type is the description. The old id shapes are rejected with the reason.
+keys="${TICKET_KEYS:-vin lem}"
+keyalt=$(printf '%s' "$keys" | tr 'A-Z' 'a-z' | tr -s ' ' '|')
+keyALT=$(printf '%s' "$keyalt" | tr 'a-z' 'A-Z')
+printf '%s' "$rest" | grep -Eq "^($keyalt|$keyALT)-[0-9]+/" \
+  && fail "the ticket id is not its own segment: a slash is a directory in the ref namespace; write '$type/rea-92-<description>'"
+printf '%s' "$rest" | grep -Eq "^($keyALT)-[0-9]+(-|$)" \
+  && fail "the ticket id must be lower case ('$(printf '%s' "$rest" | cut -d- -f1,2 | tr 'A-Z' 'a-z')'): a case-insensitive filesystem cannot hold both cases of a ref"
 printf '%s' "$rest" | grep -Eq '^[a-z0-9]+(-[a-z0-9]+)*$' || fail "name must be lower-case kebab-case (no underscores, camelCase, spaces, or extra slashes)"
-printf '%s' "$rest" | grep -Eq '^[a-z][a-z0-9]*-[0-9]+$' && fail "a ticket id alone is not a name; add what the work is: '${rest}-<semantic-name>'"
-slug=$(printf '%s' "$rest" | sed -E 's/^[a-z][a-z0-9]*-[0-9]+-//')   # strip a leading ticket id before counting words
+printf '%s' "$rest" | grep -Eq "^($keyalt)-[0-9]+$" && fail "a ticket id alone is not a name; add the description: '${rest}-<description>'"
+slug=$(printf '%s' "$rest" | sed -E "s/^($keyalt)-[0-9]+-//")
 words=$(printf '%s' "$slug" | awk -F- '{print NF}')
-[ "$words" -ge 2 ] || fail "name needs at least two words that state the objective"
-[ "$words" -le 6 ] || fail "name has $words words; compress to 2-5 without losing the distinction"
+[ "$words" -ge "$MIN_WORDS" ] || fail "description needs at least $MIN_WORDS words that state the objective"
+[ "$words" -le "$MAX_WORDS" ] || fail "description has $words words; compress to at most $MAX_WORDS without losing the distinction"
 printf '%s' "$slug" | grep -Eq -- '(^|-)(v[0-9]+|final|new|old|working|ready|wip|tmp|temp|test|draft)$' && fail "must not encode workflow state ('$rest')"
 printf '%s' "$rest" | grep -Eq -- '(^|-)(changes|update|updates|fixes|misc|cleanup|stuff|new-version)$' && fail "generic name says nothing ('$rest')"
 printf '%s' "$rest" | grep -Eq -- '-and-' && fail "one branch, one intent (split on 'and')"

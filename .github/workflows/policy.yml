@@ -3,6 +3,7 @@
 name: policy
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited]
   merge_group:
 jobs:
   policy:
@@ -16,6 +17,7 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           BRANCH: ${{ github.head_ref }}
+          TICKET_KEYS: lem
         run: .github/policy/check_branch_name.sh "$BRANCH"
       - name: pull request title
         if: github.event_name == 'pull_request'
